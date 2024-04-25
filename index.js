@@ -25,8 +25,43 @@ app.use(session({
 // configuracion de funciones
 const { checkEmailExists, addUser, activateUser, updatePersonalInfo } = require('./CrearCuenta/functionAccountNew');
 const {Login} = require('./Login/functionsLogin');
+
+//import de sensores
+const { addSensor, getAllSensors,
+  getSensorById, updateSensorById,
+  deleteSensorById }= require('./AgroetchFunctions/Sensors');
+
+  //Import de parcelas
+  const {
+    addParcela,
+    getParcelas,
+    getParcelaById,
+    updateParcela,
+    deleteParcela
+  } = require('./AgroetchFunctions/Parcelas');
+
+//imports bomba
+const { addBomba, getBombas, getBombaById, deleteBombaById } = require('./AgroetchFunctions/Bombas');
+
+//imports rutinas de riego
+const {  addRutinaRiego, getRutinasRiego, getRutinaRiegoById, updateRutinaRiego, deleteRutinaRiego } = require('./AgroetchFunctions/RutinasRiego');
+
+//imports para monitoreo esp32
+const {    addMonitoreo,
+  getAllMonitoreo,
+  getMonitoreoById,
+  updateMonitoreoById,
+  deleteMonitoreoById,
+  generateAndInsertHumidityData, getMonitoreoBySid} = require('./AgroetchFunctions/Monitoreo');
+
+
+  const generateHumidityData = require('./functionGenerateData');
+
+/* FUNCTIONS ANTERIOREES NO SIRVEN */
 const {addCepa, editCepa, deleteCepa, getCepa, getAllCepas} = require('./CepasYCultivos/FunctionsCepas');
 const {addCultivo, editCultivo, deleteCultivo, getCultivo, getAllCultivos} = require('./CepasYCultivos/FunctionsCultivos');
+
+
 
 let codigoInfo = {};
 let time;
@@ -101,6 +136,203 @@ app.post('/api/login/', async (req, res) => {
     res.status(401).json(loginResult);
   }
 });
+
+////////////////////////////////////////////////////////-----------------> Sensores
+//endpoint para insertar un sensor
+app.post('/agrotech/app/sensor', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  addSensor(req, res, formData);
+});
+
+//endpoint para obtener todos
+app.get('/agrotech/app/sensor', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  getAllSensors(req, res);
+});
+
+//eliminar los sensores
+app.delete('/agrotech/app/sensor/:id', async (req, res) => {
+  const id = req.params.id;
+  //console.log("Form data: " + formData.Email);
+  deleteSensorById(req, res, id);
+});
+
+////////////////////////////////////////////////////////-----------------> Parcelas
+app.post('/agrotech/app/parcela', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  addParcela(req, res, formData);
+});
+
+//endpoint para obtener todos
+app.get('/agrotech/app/parcela', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  console.log("Obteniendo parcelas");
+  getParcelas(req, res);
+});
+
+//endpoint para obtener una parcela
+app.get('/agrotech/app/parcela/:id', async (req, res) => {
+  const id = req.params.id;
+  
+  //console.log("Form data: " + formData.Email);
+  getParcelaById(req, res, id);
+});
+//eliminar los sensores
+app.delete('/agrotech/app/parcela/:id', async (req, res) => {
+  const id = req.params.id;
+  //console.log("Form data: " + formData.Email);
+  deleteParcela(req, res, id);
+});
+
+////////////////////////////////////////////////////////-----------------> Bombas
+app.post('/agrotech/app/bomba', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  addBomba(req, res, formData);
+});
+
+//endpoint para obtener todos
+app.get('/agrotech/app/bomba', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  getBombas(req, res);
+});
+
+//endpoint para obtener una parcela
+app.get('/agrotech/app/bomba/:id', async (req, res) => {
+  const id = req.params.id;
+  
+  //console.log("Form data: " + formData.Email);
+  getBombaById(req, res, id);
+});
+//eliminar los sensores
+app.delete('/agrotech/app/bomba/:id', async (req, res) => {
+  const id = req.params.id;
+  //console.log("Form data: " + formData.Email);
+  deleteBombaById(req, res, id);
+});
+
+
+////////////////////////////////////////////////////////-----------------> Rutinas de riego
+app.post('/agrotech/app/riego', async (req, res) => {
+  const formData = req.body;
+  console.log("Form data: " + formData.Email);
+  addRutinaRiego(req, res, formData);
+});
+
+//endpoint para obtener todos
+app.get('/agrotech/app/riego', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  getRutinasRiego(req, res);
+});
+
+//endpoint para obtener una parcela
+app.get('/agrotech/app/riego/:id', async (req, res) => {
+  const id = req.params.id;
+  
+  //console.log("Form data: " + formData.Email);
+  getRutinaRiegoById(req, res, id);
+});
+//eliminar los sensores
+app.delete('/agrotech/app/riego/:id', async (req, res) => {
+  const id = req.params.id;
+  //console.log("Form data: " + formData.Email);
+  deleteRutinaRiego(req, res, id);
+});
+
+
+
+////////////////////////////////////////////////////////-----------------> Monitoreo
+
+app.post('/agrotech/app/monitoreo', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  addMonitoreo(req, res, formData);
+});
+
+//endpoint para obtener todos
+app.get('/agrotech/app/monitoreo', async (req, res) => {
+  const formData = req.body;
+  //console.log("Form data: " + formData.Email);
+  getAllMonitoreo(req, res);
+});
+
+//endpoint para obtener una parcela
+app.get('/agrotech/app/monitoreo/:id', async (req, res) => {
+  const id = req.params.id;
+  
+  //console.log("Form data: " + formData.Email);
+  getMonitoreoById(req, res, id);
+});
+//eliminar los sensores
+app.delete('/agrotech/app/monitoreo/:id', async (req, res) => {
+  const id = req.params.id;
+  //console.log("Form data: " + formData.Email);
+  deleteMonitoreoById(req, res, id);
+});
+
+
+app.get('/json/:id', async (req, res) => {
+const id = req.params.id;
+  //console.log("Form data: " + formData.Email);
+  generateAndInsertHumidityData(req, res, id);
+});
+
+
+//crear rutina de riego
+// Ruta que realizará la solicitud al otro servidor
+app.get('/Model-AI-Rutina', async (req, res) => {
+  getMonitoreoBySid(req, res);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ////////////////////////////////////////////////////////-----------------> Cepas
